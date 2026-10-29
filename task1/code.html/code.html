@@ -1,1 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CareSlot – Doctor Appointment Booking</title>
+  <style>
+* { box-sizing: border-box; }
 
+body {
+  margin: 0;
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  color: #12302f;
+  background: #f5f9f8;
+  line-height: 1.55;
+}
+
+h1, h2, h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; line-height: 1.15; margin: 0; }
+
+:focus-visible { outline: 3px solid #cfdedb; outline-offset: 2px; }
+
+/* ---------- Header ---------- */
+.site-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 5vw; background: #12302f; position: sticky; top: 0; z-index: 10;
+}
+.brand { color: #fff; font: 700 1.4rem "Bricolage Grotesque", sans-serif; text-decoration: none; }
+.site-header nav a { color: #cfe8e4; margin-left: 20px; text-decoration: none; }
+.site-header nav a:hover { color: #fff; text-decoration: underline; }
+
+/* ---------- next-header ---------- */
+.next-header { padding: 56px 5vw 36px; max-width: 900px; }
+.next-header h1 { font-size: clamp(2rem, 5vw, 3.4rem); max-width: 18ch; }
+.next-headers p { font-size: 1.15rem; margin: 14px 0 22px; max-width: 52ch; }
+.steps { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; padding: 0; margin: 0; }
+.steps b {
+  display: inline-grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 50%; background: #0b7a6f; color: #fff; margin-right: 6px;
+}
+
+/* ---------- Layout ---------- */
+.layout {
+  display: grid; grid-template-columns: 1fr 360px; gap: 32px;
+  padding: 20px 5vw 56px; align-items: start;
+}
+
+input, textarea {
+  font: inherit; color: inherit; width: 100%;
+  padding: 10px 12px; border: 1.5px solid #12302f; border-radius: 8px; background: #fff;
+}
+input:focus, textarea:focus { border-color: #cfdedb; }
+
+/* ---------- Doctor cards ---------- */
+.doctor-grid { display: grid; gap: 16px; }
+.doctor {
+  background: #ffffff; border: 1px solid #cfdedb; border-radius: 10px;
+  padding: 18px; display: grid; grid-template-columns: 80px 1fr; gap: 4px 16px;
+}
+.avatar {
+  grid-row: span 2; width: 80px; height: 80px; border-radius: 50%;
+  object-fit: cover; border: 3px solid #cfdedb; background: #e3f3f1;
+}
+.doctor h3 { font-size: 1.2rem; }
+.spec { color: #0b7agf-dark); font-weight: 600; }
+.meta { grid-column: 1 / -1; margin: 10px 0 8px; font-size: .95rem; color: #3d5a58; }
+.doctor-photo{
+width: 100px;
+height: 1000px;
+border-radius: 50px;
+overlow: hidden;}
+.doctor-photo img{ 
+width: 100%;
+heignt: 1000%;
+object-fit: cover;
+border-radius: 50%;}
+.booking {
+  background: #ffffff; border: 1px solid ; border-radius: 10px;
+  padding: 22px; position: sticky; top: 76px;
+}
+.booking h2 { font-size: 1.4rem; margin-bottom: 8px; }
+.hint { margin: 0 0 8px; font-size: .95rem; background: #fff6dc; border-left: 5px solid #ffd166; padding: 8px 12px; border-radius: 6px; }
+
+form label { display: block; font-weight: 600; margin: 12px 0 4px; font-size: .95rem; }
+.row { display: grid; grid-template-columns: 90px 1fr; gap: 12px; }
+fieldset { border: 0; padding: 0; margin: 12px 0 0; }
+legend { font-weight: 600; font-size: .95rem; padding: 0; margin-bottom: 4px; }
+label.inline { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; margin: 0 14px 0 0; }
+label.inline input { width: auto; }
+.consent { margin-top: 14px; }
+input:user-invalid, textarea:user-invalid { border-color: #b3261e; background: #fff4f3; }
+
+.btn { font: 700 1rem "Source Sans 3", sans-serif; padding: 12px 18px; border: 0; border-radius: 8px; cursor: pointer; width: 100%; }
+.btn.primary { background:#0b7a6f; color: #fff; }
+.btn.primary:hover { background: #0b7a6f-dark; }
+#doctors h2 { font-size: 1.6rem; margin-bottom: 12px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.filters input, .slots input { position: absolute; opacity: 0; width: 1px; height: 1px; padding: 0; border: 0; }
+.filters label {
+  padding: 7px 14px; border: 1.5px solid #cfdedb; border-radius: 999px;
+  background: #fff; cursor: pointer; font-weight: 600; font-size: .92rem;
+}
+.filters input:checked + label { background: #12302f; color: #fff; border-color: #12302f; }
+.filters input:focus-visible + label, .slots input:focus-visible + label { outline: 3px solid #0b7a6f; outline-offset: 2px; }
+#doctors:has(#f-gp:checked)     .doctor:not([data-spec="gp"])     { display: none; }
+#doctors:has(#f-cardio:checked) .doctor:not([data-spec="cardio"]) { display: none; }
+#doctors:has(#f-peds:checked)   .doctor:not([data-spec="peds"])   { display: none; }
+#doctors:has(#f-derm:checked)   .doctor:not([data-spec="derm"])   { display: none; }
+.slots { position: relative; border: 0; padding: 0; margin: 0; grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+.slots legend { position: absolute; left: -9999px; }
+.slots label {
+  font-weight: 600; font-size: .9rem; padding: 7px 12px; cursor: pointer; margin: 0;
+  border: 1.5px solid #0b7a6f; ; background: #fff; color: #075a52; border-radius: 999px;
+  transition: background .15s, transform .15s;
+}
+.slots label:hover { background: #e3f3f1; }
+.slots input:checked + label { background: #ffd166; border-color: #c99410; color: #12302f; transform: scale(1.05); }
+.slots input:disabled + label { border-color: #cfdedbe; color: #8a9a98; background: #eef2f1; text-decoration: line-through; cursor: not-allowed; }
+.confirmation { display: none; background: #dff5e4; border: 1.5px solid #2e8b4a; padding: 14px; border-radius: 8px; margin: 14px 0 0; }
+.confirmation:target { display: block; }
+
+.site-footer { background: #12302f; color: #cfe8e4; padding: 24px 5vw; }
+.site-footer p { margin: 4px 0; }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .booking { position: static; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="brand" href="#top">CareSlot</a>
+    <nav aria-label="Main">
+      <a href="#doctors">Doctors</a>
+      <a href="#book">Book</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!--next-header  -->
+    <section class="next-header">
+      <h1>See a doctor this week, not next month.</h1>
+      <p>Compare doctors, pick a free slot, and register in one short form.</p>
+      <ol class="steps">
+        <li><b>1</b> Choose a doctor</li>
+        <li><b>2</b> Pick a time slot</li>
+        <li><b>3</b> Enter patient details</li>
+      </ol>
+    </section>
+
+    <div class="layout">
+      <!-- DOCTOR LIST -->
+      <section id="doctors" aria-labelledby="doc-title">
+        <h2 id="doc-title">Our doctors</h2>
+        <div class="filters" role="radiogroup" aria-label="Filter by specialization">
+          <input type="radio" name="filter" id="f-all" checked><label for="f-all">All</label>
+          <input type="radio" name="filter" id="f-gp"><label for="f-gp">General Physician</label>
+          <input type="radio" name="filter" id="f-cardio"><label for="f-cardio">Cardiologist</label>
+          <input type="radio" name="filter" id="f-peds"><label for="f-peds">Pediatrician</label>
+          <input type="radio" name="filter" id="f-derm"><label for="f-derm">Dermatologist</label>
+        </div>
+
+        
+<article class="doctor" data-spec="gp">
+    <img
+        class="avatar"
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLWPnVU80K3h1L8612oaTSZ5SL-AHdJWPJ2_p-2r45QQ&s=10.jpg"
+        alt="Photo of Dr. Vikram Kudumula"
+        width="80"
+        height="80"
+    >
+
+    <h3>Dr. Vikram Kudumula</h3>
+
+    <p class="spec">Cardiologist, 12 years of experience</p>
+
+    <p class="meta">
+        Consultation: Mon–Sat, 9:00 AM – 1:00 PM
+    </p>
+
+    <fieldset class="slots">
+        <legend>Available slots for Dr. Vikram Kudumula</legend>
+
+        <input type="radio" name="slot" id="s1"
+               value="Dr. Vikram Kudumula, 9:00 AM"
+               form="booking-form" required>
+        <label for="s1">9:00 AM</label>
+
+        <input type="radio" name="slot" id="s2"
+               value="Dr. Vikram Kudumula, 9:30 AM"
+               form="booking-form" disabled>
+        <label for="s2">9:30 AM</label>
+
+        <input type="radio" name="slot" id="s3"
+               value="Dr. Vikram Kudumula, 10:00 AM"
+               form="booking-form">
+        <label for="s3">10:00 AM</label>
+
+        <input type="radio" name="slot" id="s4"
+               value="Dr. Vikram Kudumula, 11:30 AM"
+               form="booking-form" disabled>
+        <label for="s4">11:30 AM</label>
+
+        <input type="radio" name="slot" id="s5"
+               value="Dr. Vikram Kudumula, 12:00 PM"
+               form="booking-form">
+        <label for="s5">12:00 PM</label>
+    </fieldset>
+</article>
+      <article class="doctor" data-spec="cardio">
+        <img class ="avatar" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRScHkJt94xrWT8sGalwVd9zjUs4lVFqFESTMOEu02Pgg&s=10.jpg" width="80" height="80" alt="Photo of Dr. Rama Rao">
+        <h3>Dr. Rama Rao</h3>
+        <p class="spec">physician, 18 years of experience</p>
+        <p class="meta">Consultation: Mon, Wed, Fri, 10:00 AM – 2:00 PM</p>
+        <fieldset class="slots">
+          <legend>Available slots for Dr. Suresh Kumar</legend>
+          <input type="radio" name="slot" id="s6" value="Dr.Rama rao, 10:00 AM" form="booking-form" required>
+          <label for="s6">10:00 AM</label>
+          <input type="radio" name="slot" id="s7" value="Dr. Rama rao, 10:45 AM" form="booking-form" required disabled>
+          <label for="s7">10:45 AM</label>
+          <input type="radio" name="slot" id="s8" value="Dr. Rama rao, 11:30 AM" form="booking-form" required>
+          <label for="s8">11:30 AM</label>
+          <input type="radio" name="slot" id="s9" value="Dr. Rama rao, 1:00 PM" form="booking-form" required>
+          <label for="s9">1:00 PM</label>
+        </fieldset>
+      </article>
+      <article class="doctor" data-spec="peds">
+        <img class="avatar" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxEBDUR37nKFFTRteCo_ImtbNxwLSLkXWQEgY6x-9iQg&s=10.jpg">
+        <h3>Dr.Suryanarayana</h3>
+        <p class="spec">Pediatricians, 19s years of experience</p>
+        <p class="meta">Consultation: Tue–Sat, 3:00 PM – 6:00 PM</p>
+        <fieldset class="slots">
+          <legend>Available slots for >Dr.Suryanarayana</legend>
+          <input type="radio" name="slot" id="s10" value=", 3:00 PM" form="booking-form" required disabled>
+          <label for="s10">3:00 PM</label>
+          <input type="radio" name="slot" id="s11" value="Dr.Suryanarayana, 3:30 PM" form="booking-form" required>
+          <label for="s11">3:30 PM</label>
+          <input type="radio" name="slot" id="s12" value="Dr.Suryanarayana, 4:00 PM" form="booking-form" required disabled>
+          <label for="s12">4:00 PM</label>
+          <input type="radio" name="slot" id="s13" value="Dr.Suryanarayana, 4:30 PM" form="booking-form" required disabled>
+          <label for="s13">4:30 PM</label>
+          <input type="radio" name="slot" id="s14" value="Dr.Suryanarayana, 5:30 PM" form="booking-form" required>
+          <label for="s14">5:30 PM</label>
+        </fieldset>
+      </article>
+      <article class="doctor" data-spec="derm">
+        <img class="avatar" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLuRqacXz0Y8X50VG5B9J0KKjgIV1DJWNmjihpPRkfvQ&s=10.jpg" alt="Photo of Dr.Srinivasa Murthy">
+        <h3>Dr.srinivasa Murthy</h3>
+        <p class="spec">Dermatologist, 16 years of experience</p>
+        <p class="meta">Consultation: Mon–Fri, 2:00 PM – 5:00 PM</p>
+        <fieldset class="slots">
+          <legend>Available slots for Dr.Srinivasa Murthy</legend>
+          <input type="radio" name="slot" id="s15" value="Dr.Srinivasa Murthy, 2:00 PM" form="booking-form" required>
+          <label for="s15">2:00 PM</label>
+          <input type="radio" name="slot" id="s16" value="Dr.Srinivasa Murthy, 2:30 PM" form="booking-form" required>
+          <label for="s16">2:30 PM</label>
+          <input type="radio" name="slot" id="s17" value="Dr.srinivasa Murthy 3:15 PM" form="booking-form" required>
+          <label for="s17">3:15 PM</label>
+          <input type="radio" name="slot" id="s18" value="Dr.srinivasa murthy, 4:00 PM" form="booking-form" required>
+          <label for="s18">4:00 PM</label>
+        </fieldset>
+      </article>
+        </div>
+      </section>
+
+      <!-- BOOKING FORM -->
+      <aside id="book" class="booking" aria-labelledby="book-title">
+        <h2 id="book-title">Patient registration</h2>
+        <p class="hint">Pick a slot from a doctor card. The selected slot turns yellow. Greyed slots are already booked.</p>
+
+        <!-- GET + action="#confirmed" reloads the page and shows the confirmation message via :target -->
+        <form id="booking-form" action="#confirmed" method="get">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" required minlength="3" autocomplete="name">
+
+          <div class="row">
+            <div>
+              <label for="age">Age</label>
+              <input id="age" name="age" type="number" min="0" max="120" required>
+            </div>
+            <div>
+              <label for="phone">Mobile number</label>
+              <input id="phone" name="phone" type="tel" required pattern="[6-9][0-9]{9}" title="Enter a 10-digit mobile number" placeholder="10 digits" autocomplete="tel">
+            </div>
+          </div>
+
+          <fieldset>
+            <legend>Gender</legend>
+            <label class="inline"><input type="radio" name="gender" value="Female" required> Female</label>
+            <label class="inline"><input type="radio" name="gender" value="Male"> Male</label>
+            <label class="inline"><input type="radio" name="gender" value="Other"> Other</label>
+          </fieldset>
+
+          <label for="email">Email (optional)</label>
+          <input id="email" name="email" type="email" autocomplete="email">
+
+          <label for="reason">Reason for visit</label>
+          <textarea id="reason" name="reason" rows="3" required></textarea>
+
+          <label class="inline consent">
+            <input type="checkbox" name="consent" required>
+            I confirm these details are correct.
+          </label>
+
+          <button type="submit" class="btn primary">Confirm appointment</button>
+        </form>
+
+        <p id="confirmed" class="confirmation" role="status">
+          Appointment request received. The clinic will confirm your slot by SMS.
+        </p>
+      </aside>
+    </div>
+  </main>
+
+  <footer id="contact" class="site-footer">
+    <p><b>CareSlot Clinic</b>, Benz Circle, Vijayawada. Open Mon–Sat, 9:00 AM to 6:00 PM.</p>
+    <p>Appointments: 98765 43210. Emergency: call 108 or visit the nearest hospital.</p>
+  </footer>
+
+</body>
+</html>
